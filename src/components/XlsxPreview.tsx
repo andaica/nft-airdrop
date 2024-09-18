@@ -10,14 +10,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ApproveButton from "./ApproveButton";
+import AirdropButton from "./AirdropButton";
 
 const XLSXReaderPreview = () => {
   const [sheets, setSheets] = useState<string[]>([]);
   const [currentSheet, setCurrentSheet] = useState<string>("");
   const [previewData, setPreviewData] = useState<any[][]>([]);
   const [fileName, setFileName] = useState<string>("");
+  const [appoveStatus, setApproveStatus] = useState(false);
 
   const headerContent = ["#", "Wallet Address", "Token Id"];
+  const maxRecord = 100;
 
   const handleFileUpload = (event: any) => {
     const file: File = event.target.files[0];
@@ -33,8 +37,11 @@ const XLSXReaderPreview = () => {
       setCurrentSheet(sheetNames[0]);
 
       const worksheet = workbook.Sheets[sheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, { header: 1, blankrows: false });
-      setPreviewData(jsonData.slice(1)); // Preview (exclude header)
+      const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, {
+        header: 1,
+        blankrows: false,
+      });
+      setPreviewData(jsonData.slice(1, maxRecord + 1)); // Preview (exclude header)
     };
 
     reader.readAsArrayBuffer(file);
@@ -44,19 +51,18 @@ const XLSXReaderPreview = () => {
     setCurrentSheet(sheetName);
     const workbook = XLSX.read(fileName, { type: "binary" });
     const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, { header: 1, blankrows: false });
-    setPreviewData(jsonData.slice(1)); // Preview (exclude header)
-  };
-
-  const handleAirdrop = () => {
-    const wallets = previewData.map((row) => row[1]);
-    const tokenIds = previewData.map((row) => row[2]);
-    console.log("Airdropping to wallets:", wallets, tokenIds);
+    const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, {
+      header: 1,
+      blankrows: false,
+    });
+    setPreviewData(jsonData.slice(1, maxRecord + 1)); // Preview (exclude header)
   };
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">XLSX Reader and Preview</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        Airdrop XLSX Reader and Preview
+      </h1>
       <div className="mb-4">
         <Input
           type="file"
@@ -88,12 +94,11 @@ const XLSXReaderPreview = () => {
             </SelectContent>
           </Select>
 
-          <Button
-            className="bg-green-500 text-white w-[180px] h-[50px]"
-            onClick={handleAirdrop}
-          >
-            Airdrop
-          </Button>
+          {appoveStatus ? (
+            <AirdropButton data={previewData} />
+          ) : (
+            <ApproveButton onApproveSuccess={setApproveStatus} />
+          )}
         </div>
       )}
       {previewData.length > 0 && (
@@ -117,7 +122,7 @@ const XLSXReaderPreview = () => {
             </tbody>
           </Table>
           <p className="mt-2 text-sm text-gray-500">
-            Showing all rows of data (excluding header).
+            Showing all rows of data.
           </p>
         </div>
       )}

@@ -2,6 +2,8 @@ import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { config } from "./config";
 import "./App.css";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 import XLSXReaderPreview from "./components/XlsxPreview";
 import WalletOptions from "./components/WalletOption";
@@ -16,6 +18,7 @@ function App() {
           <WalletOptions />
         </div>
         <XLSXReaderPreview />
+        <ToastContainer />
       </QueryClientProvider>
     </WagmiProvider>
   );
