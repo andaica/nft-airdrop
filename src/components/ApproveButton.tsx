@@ -10,28 +10,27 @@ import { Hex } from "viem";
 import { toast } from "react-toastify";
 
 interface ApproveButtonProps {
+  airdropContract: Hex;
+  collectionAddress: Hex;
   onApproveSuccess: (status: boolean) => void;
 }
 
-const ApproveButton: React.FC<ApproveButtonProps> = ({ onApproveSuccess }) => {
+const ApproveButton: React.FC<ApproveButtonProps> = ({
+  airdropContract,
+  collectionAddress,
+  onApproveSuccess,
+}) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { data: hash, error, writeContract } = useWriteContract();
 
   const handleApproval = async () => {
     setIsProcessing(true);
 
-    const collectionAddress = `${
-      import.meta.env.VITE_EXTERNAL_COLLECTION_ADDRESS
-    }` as Hex;
-    const airdropContractAddress = `${
-      import.meta.env.VITE_EXTERNAL_AIRDROP_CONTRACT_ADDRESS
-    }` as Hex;
-
     writeContract({
       address: collectionAddress,
       abi: NFT2Abi,
       functionName: "setApprovalForAll",
-      args: [airdropContractAddress, true],
+      args: [airdropContract, true],
     });
   };
 

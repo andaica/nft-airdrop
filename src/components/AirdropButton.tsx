@@ -5,34 +5,36 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import NFT2Abi from "../abi/nft2.json";
+import NFTAirDropAbi from "../abi/nftairdrop.json";
 import { Hex } from "viem";
 import { toast } from "react-toastify";
 
 interface AirdropButtonProps {
+  airdropContract: Hex;
+  collectionAddress: Hex;
   data: Array<any[]>;
 }
 
-const AirdropButton: React.FC<AirdropButtonProps> = ({ data }) => {
+const AirdropButton: React.FC<AirdropButtonProps> = ({
+  airdropContract,
+  collectionAddress,
+  data,
+}) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { data: hash, error, writeContract } = useWriteContract();
 
   const handleAirdrop = async () => {
-    const wallets = data.map((row) => row[1]);
+    const wallets: Hex[] = data.map((row) => row[1]);
     const tokenIds = data.map((row) => row[2]);
     console.log("Airdropping to wallets:", wallets, tokenIds);
 
     setIsProcessing(true);
 
-    const airdropContractAddress = `${
-      import.meta.env.VITE_EXTERNAL_AIRDROP_CONTRACT_ADDRESS
-    }` as Hex;
-
     writeContract({
-      address: airdropContractAddress,
-      abi: NFT2Abi,
-      functionName: "setApprovalForAll",
-      args: [airdropContractAddress, true],
+      address: airdropContract,
+      abi: NFTAirDropAbi,
+      functionName: "airdrop",
+      args: [collectionAddress, wallets, tokenIds],
     });
   };
 
@@ -42,7 +44,7 @@ const AirdropButton: React.FC<AirdropButtonProps> = ({ data }) => {
 
   useEffect(() => {
     if (isConfirmed) {
-      toast.success("Transaction success!");
+      toast.success("Airdrop success!");
       setIsProcessing(false);
     }
     if (error) {
